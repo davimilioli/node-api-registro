@@ -1,0 +1,12 @@
+POST /pessoas: Cria um novo usuário.
+
+GET /pessoas: Retorna uma lista de todos os usuários cadastrados.
+- Parametros:
+-- Page: Define a página Atualiza
+-- pageSize: Define o tamanho da página
+
+GET /pessoas/:id: Retorna um usuário específico.
+
+PUT /pessoas/:id: Atualiza os dados de um usuário.
+
+DELETE /pessoas/:id: Remove um usuário específico
