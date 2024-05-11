@@ -37,21 +37,24 @@ export const createUsuario = async (req: Request, res: Response) => {
 }
 
 export const listUsuarios = async (req: Request, res: Response) => {
+    const page: number = parseInt(req.query.page as string) || 1;
+    const pageSize: number = parseInt(req.query.pageSize as string) || 12;
 
     try {
-        const usuarios = await Usuario.getUsuarios();
-        let quantidade = usuarios.length;
+        const usuarios = await Usuario.getUsuarios(page, pageSize);
+        const totalUsuarios = await Usuario.getTotalUsuarios();
         res.json({
-            quantidade,
+            page,
+            pageSize,
+            totalUsuarios,
             usuarios,
         });
-         
-    } catch(error: any){
-        if(!error.message){
-            res.json({status: 'Erro ao consultar o banco de dados'});
+    } catch (error: any) {
+        if (!error.message) {
+            res.json({ status: 'Erro ao consultar o banco de dados' });
         } 
 
-        res.json({status: error.message});
+        res.json({ status: error.message });
     }
 }
 

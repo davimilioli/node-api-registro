@@ -32,7 +32,7 @@ export const Usuario = {
         return new Promise<number>((resolve, reject) => {
             db.run(sql, Object.values(dados), function(error) {
                 if (error) {
-                    console.log('Erro ao inserir dados', error);
+
                     reject(new Error('Erro ao inserir dados no banco de dados'));
                     return;
                 } else {
@@ -41,29 +41,48 @@ export const Usuario = {
             });  
         });
     },
-    async getUsuarios() {
-
+    async getUsuarios(page: number, pageSize: number) {
         const lista: Usuario[] = [];
-        const sql = `SELECT * FROM usuarios`;
-
+        const offset = (page - 1) * pageSize;
+        const sql = `SELECT * FROM usuarios ORDER BY id LIMIT ? OFFSET ?`;
+    
         return new Promise<Usuario[]>((resolve, reject) => {
-            
-            db.all(sql, [], (error, rows) => {
+            db.all(sql, [pageSize, offset], (error, rows) => {
                 if (error) {
                     reject(new Error('Erro ao consultar usuários'));
                     return;
                 }
-
-                if(!rows){
+    
+                if (!rows) {
                     reject();
+                    return;
                 }
-                
+    
                 rows.forEach((row) => {
                     const usuario: Usuario = row as Usuario;
                     lista.push(usuario);
                 });
     
-                return resolve(lista);
+                resolve(lista);
+            });
+        });
+    },    
+    async getTotalUsuarios() {
+        const sql = `SELECT COUNT(*) as total FROM usuarios`;
+    
+        return new Promise<number>((resolve, reject) => {
+            db.get(sql, [], (error, row: any) => {
+                if (error) {
+                    reject(new Error('Erro ao contar usuários'));
+                    return;
+                }
+    
+                if (!row || !row.total) {
+                    resolve(0);
+                    return;
+                }
+    
+                resolve(row.total);
             });
         });
     },
