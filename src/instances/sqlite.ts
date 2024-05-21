@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const db = new Database('./usuarios.db', (err) => {
+const db = new Database('./users.db', (err) => {
     if(err){
         console.log('Erro na conexão com o banco de dados', err.message);
     }else {

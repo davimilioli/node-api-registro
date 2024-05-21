@@ -1,4 +1,5 @@
 import db  from '../instances/sqlite';
+import { UsuarioSequelize } from '../instances/sqlSequelize';
 
 type Usuario = {
     id?: number,
@@ -14,7 +15,24 @@ type Usuario = {
 
 export const Usuario = {
     async createUsuario(usuario: Usuario) {
-        const dados = {
+
+        try{   
+            const novoUsuario = await UsuarioSequelize.create({
+                nome: usuario.nome,
+                rg: usuario.rg,
+                cpf: usuario.cpf,
+                telefone: usuario.telefone,
+                celular: usuario.celular,
+                email: usuario.email,
+                criado_em: usuario.criado_em,
+            })
+
+            console.log('Novo usuário criado:', novoUsuario.toJSON());
+        }catch(error){
+            console.error('Erro ao criar novo usuário', error);
+        }
+
+/*         const dados = {
             nome: usuario.nome,
             rg: usuario.rg,
             cpf: usuario.cpf,
@@ -39,7 +57,7 @@ export const Usuario = {
                     resolve(this.lastID);
                 }
             });  
-        });
+        }); */
     },
     async getUsuarios(page: number, pageSize: number) {
         const lista: Usuario[] = [];
