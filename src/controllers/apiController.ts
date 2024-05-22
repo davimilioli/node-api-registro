@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { Usuario } from "../models/Usuario";
 
-
 export const createUsuario = async (req: Request, res: Response) => {
     let { nome, rg, cpf, telefone, celular, email } = req.body;
     let dataAtual = new Date();
@@ -37,17 +36,17 @@ export const createUsuario = async (req: Request, res: Response) => {
 }
 
 export const listUsuarios = async (req: Request, res: Response) => {
-    const page: number = parseInt(req.query.page as string) || 1;
-    const pageSize: number = parseInt(req.query.pageSize as string) || 12;
+    const page: number = parseInt(req.query.page as string);
+    const pageSize: number = parseInt(req.query.pageSize as string);
 
     try {
         const usuarios = await Usuario.getUsuarios(page, pageSize);
-        const totalUsuarios = await Usuario.getTotalUsuarios();
+        
         res.json({
             page,
             pageSize,
-            totalUsuarios,
-            usuarios,
+            total: usuarios.qtd,
+            usuarios: usuarios.usuarios,
         });
     } catch (error: any) {
         if (!error.message) {

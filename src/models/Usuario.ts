@@ -1,5 +1,4 @@
-import db  from '../instances/sqlite';
-import { UsuarioSequelize } from '../instances/sqlSequelize';
+import { UsuarioDB } from '../instances/sqlite';
 
 type Usuario = {
     id?: number,
@@ -14,168 +13,109 @@ type Usuario = {
 }
 
 export const Usuario = {
-    async createUsuario(usuario: Usuario) {
+  async createUsuario(usuario: Usuario) {
 
-        try{   
-            const novoUsuario = await UsuarioSequelize.create({
-                nome: usuario.nome,
-                rg: usuario.rg,
-                cpf: usuario.cpf,
-                telefone: usuario.telefone,
-                celular: usuario.celular,
-                email: usuario.email,
-                criado_em: usuario.criado_em,
-            })
+    try{   
+      await UsuarioDB.create({
+        nome: usuario.nome,
+        rg: usuario.rg,
+        cpf: usuario.cpf,
+        telefone: usuario.telefone,
+        celular: usuario.celular,
+        email: usuario.email,
+        criado_em: usuario.criado_em,
+      })
 
-            console.log('Novo usuário criado:', novoUsuario.toJSON());
-        }catch(error){
-            console.error('Erro ao criar novo usuário', error);
-        }
-
-/*         const dados = {
-            nome: usuario.nome,
-            rg: usuario.rg,
-            cpf: usuario.cpf,
-            telefone: usuario.telefone,
-            celular: usuario.celular,
-            email: usuario.email,
-            criado_em: usuario.criado_em,
-            atualizado_em: usuario.atualizado_em
-        };
-        
-        const sql = `
-            INSERT INTO usuarios (nome, rg, cpf, telefone, celular, email, criado_em) VALUES (?, ?, ?, ?, ?, ?, ?)
-        `;
-
-        return new Promise<number>((resolve, reject) => {
-            db.run(sql, Object.values(dados), function(error) {
-                if (error) {
-
-                    reject(new Error('Erro ao inserir dados no banco de dados'));
-                    return;
-                } else {
-                    resolve(this.lastID);
-                }
-            });  
-        }); */
-    },
-    async getUsuarios(page: number, pageSize: number) {
-        const lista: Usuario[] = [];
-        const offset = (page - 1) * pageSize;
-        const sql = `SELECT * FROM usuarios ORDER BY id LIMIT ? OFFSET ?`;
-    
-        return new Promise<Usuario[]>((resolve, reject) => {
-            db.all(sql, [pageSize, offset], (error, rows) => {
-                if (error) {
-                    reject(new Error('Erro ao consultar usuários'));
-                    return;
-                }
-    
-                if (!rows) {
-                    reject();
-                    return;
-                }
-    
-                rows.forEach((row) => {
-                    const usuario: Usuario = row as Usuario;
-                    lista.push(usuario);
-                });
-    
-                resolve(lista);
-            });
-        });
-    },    
-    async getTotalUsuarios() {
-        const sql = `SELECT COUNT(*) as total FROM usuarios`;
-    
-        return new Promise<number>((resolve, reject) => {
-            db.get(sql, [], (error, row: any) => {
-                if (error) {
-                    reject(new Error('Erro ao contar usuários'));
-                    return;
-                }
-    
-                if (!row || !row.total) {
-                    resolve(0);
-                    return;
-                }
-    
-                resolve(row.total);
-            });
-        });
-    },
-    async getUsuario(id: number) {
-        const sql = `SELECT * FROM usuarios WHERE ID = ?`;
-
-        return new Promise<Usuario[]>((resolve, reject) => {
-            db.all(sql, [id], (error, rows) => {
-                if (error) {
-                    reject(new Error('Erro ao consultar usuário'));
-                    return;
-                }
-                
-                const usuario: Usuario[] = rows.map((row) => row as Usuario);
-
-                if(usuario.length == 0){
-                    reject(new Error(`O ID ${id} não existe`));
-                }
-
-                resolve(usuario)
-            });
-        });
-    },
-    async updateUsuario(id: number, telefone: string | undefined, celular: string | undefined, email: string | undefined, atualizado_em: string) {
-        let sql = "UPDATE usuarios SET ";
-        const values: any = [];
-    
-        if (telefone !== undefined) {
-            sql += "telefone = ?, ";
-            values.push(telefone);
-        }
-    
-        if (celular !== undefined) {
-            sql += "celular = ?, ";
-            values.push(celular);
-        }
-    
-        if (email !== undefined) {
-            sql += "email = ?, ";
-            values.push(email);
-        }
-    
-        sql += "atualizado_em = ? WHERE id = ?";
-        values.push(atualizado_em, id);
-    
-        return new Promise<void>((resolve, reject) => {
-            db.run(sql, values, function(error) {
-                if (error) {
-                    reject(new Error('Erro ao atualizar usuário'));
-                }
-    
-                if (this.changes === 0) {
-                    reject(new Error(`O ID ${id} não existe`));
-                    return;
-                }
-    
-                resolve();
-            });
-        });
-    },
-    async deleteUsuario(id: number){
-        const sql = `DELETE FROM usuarios WHERE id = ? `;
-
-        return new Promise<void>((resolve, reject) => {
-            db.run(sql, [id], function(error) {
-                if(error){
-                    reject(error);
-                }
-
-                if(this.changes === 0){
-                    reject(new Error(`O ID ${id} não existe`));
-                }
-
-                resolve();
-            })
-        })
+    }catch(error){
+      console.error('Erro ao criar novo usuário', error);
+      throw new Error('Erro ao criar novo usuário');
     }
+
+  },
+  async getUsuarios(page: number = 1, pageSize: number = 12) {
+
+    try {
+      const offset = (page - 1) * pageSize;
+
+      const { rows: usuarios, count: totalUsuarios } = await UsuarioDB.findAndCountAll({
+        offset: offset,
+        limit: pageSize,
+        order: [['id', 'ASC']],
+      });
+
+      return {
+        usuarios: usuarios,
+        qtd: totalUsuarios,
+      };
+
+    } catch (error) {
+      console.error('Erro ao buscar usuários:', error);
+      throw new Error('Erro ao buscar usuários');
+    }
+
+  },    
+  async getUsuario(id: number) {
+
+    try {
+      return await UsuarioDB.findByPk(id);
+
+    } catch (error) {
+      console.error('Erro ao buscar usuário:', error);
+      throw new Error('Erro ao buscar usuário');
+    }
+
+  },
+  async updateUsuario(id: number,
+    telefone: string | undefined,
+    celular: string | undefined,
+    email: string | undefined,
+    atualizado_em: string
+  ) {
+    try {
+      const updateUsuario: { [key: string]: any } = { atualizado_em };
+  
+      if (telefone !== undefined) {
+        updateUsuario.telefone = telefone;
+      }
+  
+      if (celular !== undefined) {
+        updateUsuario.celular = celular;
+      }
+  
+      if (email !== undefined) {
+        updateUsuario.email = email;
+      }
+  
+      const [result] = await UsuarioDB.update(updateUsuario, {
+        where: { id },
+      });
+  
+      if (result === 0) {
+        throw new Error(`O ID ${id} não existe`);
+      }
+        
+    } catch (error) {
+      console.error('Erro ao atualizar usuário:', error);
+      throw new Error('Erro ao atualizar usuário');
+    }
+
+  },
+  async deleteUsuario(id: number){
+    
+    try {
+      const delUsuario = await UsuarioDB.destroy({
+        where: { id },
+      });
+  
+      if (delUsuario === 0) {
+        throw new Error(`O ID ${id} não existe`);
+      }
+
+    } catch (error) {
+
+      console.error('Erro ao deletar usuário:', error);
+      throw new Error('Erro ao deletar usuário');
+    }
+
+  }
 };

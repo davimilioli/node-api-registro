@@ -1,28 +1,63 @@
-import { Database } from 'sqlite3';
-import dotenv from 'dotenv';
+import { Sequelize, DataTypes } from 'sequelize';
+import { resolve } from 'path';
 
-dotenv.config();
+const sequelize = new Sequelize({
+    dialect: 'sqlite',
+    storage: resolve(__dirname, '../../registro.db'),
+});
 
-const db = new Database('./users.db', (err) => {
-    if(err){
-        console.log('Erro na conexão com o banco de dados', err.message);
-    }else {
-        console.log('Conexão com o banco de dados feita');
+const UsuarioDB = sequelize.define('Usuario', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    nome: {
+        type: DataTypes.STRING,
+    },
+    rg: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    cpf: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    telefone: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    celular: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    email: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    criado_em: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        defaultValue: null,
+    },
+    atualizado_em: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        defaultValue: null,
+    },
+}, {
+    tableName: 'usuarios',
+    timestamps: false
+});
+
+async function createTable() {
+    try {
+        await UsuarioDB.sync();
+    } catch (error) {
+        console.error('Erro', error);
     }
-})
+}
 
-/* Comando para criar a tabela USUARIOS */
-/* db.serialize(() => {
-    const criarTabela = 'CREATE TABLE "usuarios" (id INTEGER PRIMARY KEY, nome VARCHAR, rg VARCHAR(9), cpf VARCHAR(11), telefone VARCHAR(20), celular VARCHAR(20), email VARCHAR, criado_em DATE, atualizado_em DATE)';
+createTable();
 
-    db.run(criarTabela, (err) => {
-        if (err) {
-            console.error('Erro', err.message);
-        } else {
-            console.log('Tabela usuarios criada');
-        }
-    });
-}); */
-
-
-export default db;
+export { sequelize, UsuarioDB };
