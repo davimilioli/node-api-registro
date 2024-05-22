@@ -1,6 +1,9 @@
 POST /pessoas: Cria um novo usuário.
 
 GET /pessoas: Retorna uma lista de todos os usuários cadastrados.
+PARAMETROS
+-- Page: Define a página de usuários | padrão: 1
+-- pageSize: Define a quantidade de usuários em uma página | padrão: 12
 
 GET /pessoas/:id: Retorna um usuário específico.
 
